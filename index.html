@@ -398,6 +398,59 @@
       padding: 10px 0;
     }
 
+    /* Mobile-Ready Download Result Modal */
+    .download-modal-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .download-modal-box {
+      background: #ffffff;
+      border-radius: 14px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      box-sizing: border-box;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .download-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1.5px solid #e2e8f0;
+      margin-bottom: 10px;
+    }
+    .mobile-save-guide {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .download-img-container {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px;
+      background: #f8fafc;
+      text-align: center;
+    }
+
     /* ========================================================
        THE EXACT REPORT INFOGRAPHIC POSTER
        ======================================================== */
@@ -1263,7 +1316,16 @@
     }
 
     .hidden-file-input {
-      display: none;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
+      opacity: 0.01 !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      pointer-events: none !important;
+      z-index: -999 !important;
     }
 
     /* Toast notification */
@@ -1317,7 +1379,7 @@
       <button class="btn btn-primary" onclick="printReport()">
         🖨️ พิมพ์/PDF
       </button>
-      <button class="btn btn-success" id="exportBtn" onclick="exportToImage()">
+      <button class="btn btn-success btn-export-trigger" id="exportBtn" onclick="exportToImage()">
         📸 บันทึกรูป (PNG)
       </button>
     </div>
@@ -1590,15 +1652,21 @@
             </select>
           </div>
           <!-- รูปถ่ายที่ 1 -->
-          <div class="form-group" style="background:#f8fafc; padding:8px 10px; border-radius:8px; border:1px solid #cbd5e1;">
-            <label class="form-label" style="font-weight:700; color:#0c3166;">รูปถ่ายที่ 1 (ซ้าย):</label>
-            <div style="display:flex; gap:6px; margin-top:4px;">
-              <button type="button" class="btn btn-sm btn-primary" onclick="triggerPhotoUpload('photo1')" style="flex:1; font-size:0.75rem; padding:5px 8px;">
-                📁 เลือกรูปที่ 1
+          <div class="form-group" style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label class="form-label" style="font-weight:700; color:#0c3166; margin:0;">📷 รูปถ่ายที่ 1 (ซ้าย):</label>
+              <span id="photo1StatusBadge" style="font-size:0.75rem; padding:2px 8px; border-radius:12px; background:#e2e8f0; color:#475569; font-weight:600;">ยังไม่มีรูป</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <label for="photo1Input" class="btn btn-sm btn-primary" style="flex:1; justify-content:center; padding:8px 10px; font-size:0.82rem; font-weight:700; cursor:pointer; text-align:center;">
+                📁 แตะเพื่อเลือกรูปที่ 1
+              </label>
+              <button type="button" class="btn btn-sm btn-danger" onclick="removePhoto('photo1')" style="padding:8px 12px; font-size:0.82rem; background:#ef4444; color:white; border:none; border-radius:5px; cursor:pointer;">
+                🗑️ ลบ
               </button>
-              <button type="button" class="btn btn-sm btn-danger" onclick="removePhoto('photo1')" style="font-size:0.75rem; padding:5px 8px; background:#ef4444; color:white; border:none; border-radius:4px;">
-                🗑️ ลบรูปที่ 1
-              </button>
+            </div>
+            <div style="margin-top:6px;">
+              <input type="file" id="fallbackPhoto1" accept="image/jpeg,image/png,image/webp,image/jpg,image/heic,image/*" class="form-control" style="font-size:0.78rem; padding:4px;" onchange="handlePhotoUpload(event, 'photo1')">
             </div>
           </div>
 
@@ -1610,15 +1678,21 @@
           </div>
 
           <!-- รูปถ่ายที่ 2 -->
-          <div class="form-group" id="photo2_group" style="background:#f8fafc; padding:8px 10px; border-radius:8px; border:1px solid #cbd5e1;">
-            <label class="form-label" style="font-weight:700; color:#0c3166;">รูปถ่ายที่ 2 (ขวา):</label>
-            <div style="display:flex; gap:6px; margin-top:4px;">
-              <button type="button" class="btn btn-sm btn-primary" onclick="triggerPhotoUpload('photo2')" style="flex:1; font-size:0.75rem; padding:5px 8px;">
-                📁 เลือกรูปที่ 2
+          <div class="form-group" id="photo2_group" style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label class="form-label" style="font-weight:700; color:#0c3166; margin:0;">📷 รูปถ่ายที่ 2 (ขวา):</label>
+              <span id="photo2StatusBadge" style="font-size:0.75rem; padding:2px 8px; border-radius:12px; background:#e2e8f0; color:#475569; font-weight:600;">ยังไม่มีรูป</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <label for="photo2Input" class="btn btn-sm btn-primary" style="flex:1; justify-content:center; padding:8px 10px; font-size:0.82rem; font-weight:700; cursor:pointer; text-align:center;">
+                📁 แตะเพื่อเลือกรูปที่ 2
+              </label>
+              <button type="button" class="btn btn-sm btn-danger" onclick="removePhoto('photo2')" style="padding:8px 12px; font-size:0.82rem; background:#ef4444; color:white; border:none; border-radius:5px; cursor:pointer;">
+                🗑️ ลบ
               </button>
-              <button type="button" class="btn btn-sm btn-danger" onclick="removePhoto('photo2')" style="font-size:0.75rem; padding:5px 8px; background:#ef4444; color:white; border:none; border-radius:4px;">
-                🗑️ ลบรูปที่ 2
-              </button>
+            </div>
+            <div style="margin-top:6px;">
+              <input type="file" id="fallbackPhoto2" accept="image/jpeg,image/png,image/webp,image/jpg,image/heic,image/*" class="form-control" style="font-size:0.78rem; padding:4px;" onchange="handlePhotoUpload(event, 'photo2')">
             </div>
           </div>
           <div class="form-group">
@@ -1715,10 +1789,13 @@
         </div>
       </div>
 
-      <!-- JUMP TO BOTTOM BUTTON (For Mobile Users) -->
-      <div style="margin-top: 14px;">
-        <a href="#previewSection" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 0.95rem; border-radius: 10px;">
-          👇 กรอกข้อมูลเสร็จแล้ว เลื่อนลงไปดูภาพตัวอย่างด้านล่าง
+      <!-- JUMP TO BOTTOM & QUICK EXPORT BUTTONS (For Mobile Users) -->
+      <div style="margin-top: 14px; display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="btn btn-success btn-export-trigger" onclick="exportToImage()" style="width: 100%; justify-content: center; padding: 12px; font-size: 0.95rem; font-weight: 800; border-radius: 10px; background: #16a34a; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35); cursor:pointer;">
+          📸 บันทึกรูปภาพรายงาน (PNG)
+        </button>
+        <a href="#previewSection" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.90rem; border-radius: 10px;">
+          👇 ดูภาพตัวอย่างรายงานด้านล่าง
         </a>
       </div>
     </aside>
@@ -1737,7 +1814,7 @@
           <a href="#sidebarPanel" class="btn btn-secondary" style="font-size: 0.78rem; padding: 5px 12px; background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1;">
             👆 กลับไปแก้ไขฟอร์ม
           </a>
-          <button class="btn btn-success" style="font-size: 0.8rem; padding: 5px 12px;" onclick="exportToImage()">
+          <button class="btn btn-success btn-export-trigger" style="font-size: 0.8rem; padding: 5px 12px;" onclick="exportToImage()">
             📸 บันทึกรูปภาพ (PNG)
           </button>
         </div>
@@ -1995,23 +2072,23 @@
               <div class="photos-grid layout-2" id="photosGrid">
                 
                 <!-- Photo 1 -->
-                <div class="photo-frame active-slot" id="photo1Frame" onclick="triggerPhotoUpload('photo1')" ondblclick="triggerPhotoUpload('photo1')" title="คลิกเพื่อเลือกรูปภาพที่ 1">
-                  <!-- Empty placeholder by default -->
-                  <div class="photo-placeholder" id="photo1Placeholder">
+                <div class="photo-frame active-slot" id="photo1Frame" onclick="selectPhotoSlot('photo1')" title="แตะหรือคลิกเพื่อเลือกรูปภาพที่ 1">
+                  <!-- Empty placeholder by default (Wrapped with label for 100% reliable native mobile tap) -->
+                  <label for="photo1Input" class="photo-placeholder" id="photo1Placeholder" style="cursor:pointer; width:100%; height:100%; text-decoration:none;">
                     <div class="placeholder-icon">📷</div>
-                    <div class="placeholder-title">คลิกเพื่อเพิ่มรูปภาพที่ 1</div>
-                    <div class="placeholder-sub">(หรือลากรูปมาวาง / กด Ctrl + V)</div>
+                    <div class="placeholder-title">คลิกหรือแตะเพื่อเพิ่มรูปภาพที่ 1</div>
+                    <div class="placeholder-sub">(เลือกจากคลังภาพ / ถ่ายภาพ)</div>
                     <div class="placeholder-btn">＋ เลือกไฟล์รูปภาพ</div>
-                  </div>
+                  </label>
                   <!-- The image element (hidden initially until image uploaded) -->
                   <img id="photo1Img" src="" class="photo-img" alt="รูปปฏิบัติงาน 1">
                   <!-- Hover Action overlay when image is present -->
                   <div class="photo-overlay-edit" id="photo1Overlay">
                     <div style="display:flex; gap:6px;">
-                      <button type="button" class="btn btn-sm" onclick="event.stopPropagation(); triggerPhotoUpload('photo1')" style="background:#0284c7; color:white; font-size:0.75rem; padding:5px 10px; border-radius:4px; border:none; cursor:pointer; font-weight:600;">
+                      <label for="photo1Input" class="btn btn-sm" onclick="event.stopPropagation(); selectPhotoSlot('photo1')" style="background:#0284c7; color:white; font-size:0.75rem; padding:6px 12px; border-radius:4px; border:none; cursor:pointer; font-weight:600; text-decoration:none; display:inline-flex; align-items:center;">
                         🔄 เปลี่ยนรูป
-                      </button>
-                      <button type="button" class="btn btn-sm" onclick="removePhoto('photo1', event)" style="background:#ef4444; color:white; font-size:0.75rem; padding:5px 10px; border-radius:4px; border:none; cursor:pointer; font-weight:600;">
+                      </label>
+                      <button type="button" class="btn btn-sm" onclick="removePhoto('photo1', event)" style="background:#ef4444; color:white; font-size:0.75rem; padding:6px 12px; border-radius:4px; border:none; cursor:pointer; font-weight:600;">
                         🗑️ ลบรูป
                       </button>
                     </div>
@@ -2022,29 +2099,29 @@
                     <div class="watermark-en" id="view_wm_en" contenteditable="true" onclick="event.stopPropagation()" oninput="syncInput('wm_en', this.innerText)">BANGPAKONG POLICE PATROL</div>
                   </div>
                 </div>
-                <input type="file" id="photo1Input" class="hidden-file-input" accept="image/*" onchange="handlePhotoUpload(event, 'photo1')">
+                <input type="file" id="photo1Input" class="hidden-file-input" accept="image/jpeg,image/png,image/webp,image/jpg,image/heic,image/*" onchange="handlePhotoUpload(event, 'photo1')">
 
                 <!-- Photo 2 -->
-                <div class="photo-frame" id="photo2Frame" onclick="triggerPhotoUpload('photo2')" ondblclick="triggerPhotoUpload('photo2')" title="คลิกเพื่อเลือกรูปภาพที่ 2">
-                  <div class="photo-placeholder" id="photo2Placeholder">
+                <div class="photo-frame" id="photo2Frame" onclick="selectPhotoSlot('photo2')" title="แตะหรือคลิกเพื่อเลือกรูปภาพที่ 2">
+                  <label for="photo2Input" class="photo-placeholder" id="photo2Placeholder" style="cursor:pointer; width:100%; height:100%; text-decoration:none;">
                     <div class="placeholder-icon">📷</div>
-                    <div class="placeholder-title">คลิกเพื่อเพิ่มรูปภาพที่ 2</div>
-                    <div class="placeholder-sub">(หรือลากรูปมาวาง / กด Ctrl + V)</div>
+                    <div class="placeholder-title">คลิกหรือแตะเพื่อเพิ่มรูปภาพที่ 2</div>
+                    <div class="placeholder-sub">(เลือกจากคลังภาพ / ถ่ายภาพ)</div>
                     <div class="placeholder-btn">＋ เลือกไฟล์รูปภาพ</div>
-                  </div>
+                  </label>
                   <img id="photo2Img" src="" class="photo-img" alt="รูปปฏิบัติงาน 2">
                   <div class="photo-overlay-edit" id="photo2Overlay">
                     <div style="display:flex; gap:6px;">
-                      <button type="button" class="btn btn-sm" onclick="event.stopPropagation(); triggerPhotoUpload('photo2')" style="background:#0284c7; color:white; font-size:0.75rem; padding:5px 10px; border-radius:4px; border:none; cursor:pointer; font-weight:600;">
+                      <label for="photo2Input" class="btn btn-sm" onclick="event.stopPropagation(); selectPhotoSlot('photo2')" style="background:#0284c7; color:white; font-size:0.75rem; padding:6px 12px; border-radius:4px; border:none; cursor:pointer; font-weight:600; text-decoration:none; display:inline-flex; align-items:center;">
                         🔄 เปลี่ยนรูป
-                      </button>
-                      <button type="button" class="btn btn-sm" onclick="removePhoto('photo2', event)" style="background:#ef4444; color:white; font-size:0.75rem; padding:5px 10px; border-radius:4px; border:none; cursor:pointer; font-weight:600;">
+                      </label>
+                      <button type="button" class="btn btn-sm" onclick="removePhoto('photo2', event)" style="background:#ef4444; color:white; font-size:0.75rem; padding:6px 12px; border-radius:4px; border:none; cursor:pointer; font-weight:600;">
                         🗑️ ลบรูป
                       </button>
                     </div>
                   </div>
                 </div>
-                <input type="file" id="photo2Input" class="hidden-file-input" accept="image/*" onchange="handlePhotoUpload(event, 'photo2')">
+                <input type="file" id="photo2Input" class="hidden-file-input" accept="image/jpeg,image/png,image/webp,image/jpg,image/heic,image/*" onchange="handlePhotoUpload(event, 'photo2')">
 
               </div>
 
@@ -2381,9 +2458,10 @@
     // Active Photo Slot Tracking for Click & Ctrl+V Paste
     function selectPhotoSlot(slot) {
       activeSlot = slot;
-      document.getElementById('photo1Frame').classList.toggle('active-slot', slot === 'photo1');
-      document.getElementById('photo2Frame').classList.toggle('active-slot', slot === 'photo2');
-      document.getElementById(slot + 'Input').click();
+      const f1 = document.getElementById('photo1Frame');
+      const f2 = document.getElementById('photo2Frame');
+      if (f1) f1.classList.toggle('active-slot', slot === 'photo1');
+      if (f2) f2.classList.toggle('active-slot', slot === 'photo2');
     }
 
     // Paste from Clipboard (Ctrl+V) directly into active photo slot
@@ -2670,7 +2748,10 @@
     function triggerPhotoUpload(target) {
       selectPhotoSlot(target);
       const input = document.getElementById(target + 'Input');
-      if (input) input.click();
+      if (input) {
+        input.value = '';
+        input.click();
+      }
     }
 
     // Set Photo Src and Toggle Placeholder vs Image
@@ -2679,6 +2760,7 @@
       const placeholder = document.getElementById(target + 'Placeholder');
       const frame = document.getElementById(target + 'Frame');
       const wm = (target === 'photo1') ? document.getElementById('photo1Watermark') : null;
+      const statusBadge = document.getElementById(target + 'StatusBadge');
       if (!img || !placeholder) return;
 
       if (src && src.trim()) {
@@ -2687,12 +2769,22 @@
         placeholder.style.display = 'none';
         if (wm) wm.style.display = 'block';
         if (frame) frame.classList.add('has-photo');
+        if (statusBadge) {
+          statusBadge.innerText = '✅ มีรูปแล้ว';
+          statusBadge.style.background = '#dcfce7';
+          statusBadge.style.color = '#15803d';
+        }
       } else {
         img.src = '';
         img.style.display = 'none';
         placeholder.style.display = 'flex';
         if (wm) wm.style.display = 'none';
         if (frame) frame.classList.remove('has-photo');
+        if (statusBadge) {
+          statusBadge.innerText = 'ยังไม่มีรูป';
+          statusBadge.style.background = '#e2e8f0';
+          statusBadge.style.color = '#475569';
+        }
       }
     }
 
@@ -2702,19 +2794,54 @@
       setPhotoSrc(target, '');
       const input = document.getElementById(target + 'Input');
       if (input) input.value = '';
+      const fallback = document.getElementById('fallback' + capitalize(target));
+      if (fallback) fallback.value = '';
       showToast('ลบรูปภาพเรียบร้อย');
       adjustPosterScale();
     }
 
-    // Photo Upload Handler
+    // Photo Upload Handler with Client-side Downscaling for Mobile Safety
     function handlePhotoUpload(event, target) {
-      const file = event.target.files[0];
+      const file = event.target.files && event.target.files[0];
       if (!file) return;
+
+      const srcInput = event.target;
       const reader = new FileReader();
       reader.onload = function(e) {
-        setPhotoSrc(target, e.target.result);
-        showToast('อัปโหลดรูปภาพสำเร็จ');
-        adjustPosterScale();
+        const tempImg = new Image();
+        tempImg.onload = function() {
+          const maxDim = 1600;
+          let w = tempImg.width;
+          let h = tempImg.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(tempImg, 0, 0, w, h);
+            const compressed = canvas.toDataURL('image/jpeg', 0.90);
+            setPhotoSrc(target, compressed);
+          } else {
+            setPhotoSrc(target, e.target.result);
+          }
+          srcInput.value = '';
+          showToast('อัปโหลดรูปภาพสำเร็จ');
+          adjustPosterScale();
+        };
+        tempImg.onerror = function() {
+          setPhotoSrc(target, e.target.result);
+          srcInput.value = '';
+          showToast('อัปโหลดรูปภาพสำเร็จ');
+          adjustPosterScale();
+        };
+        tempImg.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -2752,14 +2879,41 @@
       window.print();
     }
 
-    // Export to High-Res PNG Image
+    let currentBlob = null;
+    let currentBlobUrl = null;
+    let currentFilename = 'รายงานผลการปฏิบัติ.png';
+
+    function setAllExportButtonsLoading(isLoading) {
+      const btns = document.querySelectorAll('.btn-export-trigger');
+      btns.forEach(b => {
+        if (isLoading) {
+          b.dataset.origText = b.innerHTML;
+          b.innerHTML = '⏳ กำลังสร้างภาพ...';
+          b.disabled = true;
+        } else {
+          b.innerHTML = b.dataset.origText || '📸 บันทึกรูป (PNG)';
+          b.disabled = false;
+        }
+      });
+      const topBtn = document.getElementById('exportBtn');
+      if (topBtn && !topBtn.classList.contains('btn-export-trigger')) {
+        if (isLoading) {
+          topBtn.innerHTML = '⏳ กำลังสร้างภาพ...';
+          topBtn.disabled = true;
+        } else {
+          topBtn.innerHTML = '📸 บันทึกรูป (PNG)';
+          topBtn.disabled = false;
+        }
+      }
+    }
+
+    // Export to High-Res PNG Image with Robust Mobile Download & Native Share Support
     function exportToImage() {
       const poster = document.getElementById('reportPoster');
       const container = document.getElementById('posterScaleContainer');
-      const btn = document.getElementById('exportBtn');
-      const origText = btn.innerHTML;
-      btn.innerHTML = '⏳ กำลังสร้างภาพ...';
-      btn.disabled = true;
+      if (!poster || !container) return;
+
+      setAllExportButtonsLoading(true);
 
       // Temporarily remove transform for accurate rendering
       const wrapper = document.querySelector('.poster-scale-wrapper');
@@ -2769,6 +2923,10 @@
       container.style.transform = 'none';
       container.style.height = 'auto';
       if (wrapper) wrapper.style.height = 'auto';
+
+      const stn = (document.getElementById('view_station_th').innerText.trim() || 'ตำรวจ').replace(/[\s\/]/g, '_');
+      const dateStr = (document.getElementById('view_report_date').innerText.trim() || 'วันที่').replace(/[\s\/]/g, '_');
+      currentFilename = `รายงานผลการปฏิบัติ_${stn}_${dateStr}.png`;
 
       html2canvas(poster, {
         scale: 2,
@@ -2780,24 +2938,121 @@
         container.style.height = prevHeight;
         if (wrapper) wrapper.style.height = prevWrapperHeight;
 
-        const link = document.createElement('a');
-        const stn = document.getElementById('view_station_th').innerText.trim() || 'ตำรวจ';
-        const dateStr = document.getElementById('view_report_date').innerText.trim().replace(/[\s\/]/g, '_');
-        link.download = `รายงานผลการปฏิบัติ_${stn}_${dateStr}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        const processBlob = (blob) => {
+          currentBlob = blob;
+          if (currentBlobUrl) {
+            URL.revokeObjectURL(currentBlobUrl);
+          }
+          currentBlobUrl = URL.createObjectURL(blob);
 
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        showToast('ดาวน์โหลดรูปภาพรายงานสำเร็จ (PNG คมชัดสูง)');
+          // Update image in download modal
+          const modalImg = document.getElementById('downloadResultImg');
+          if (modalImg) modalImg.src = currentBlobUrl;
+
+          // Attempt browser auto-download trigger
+          try {
+            const link = document.createElement('a');
+            link.download = currentFilename;
+            link.href = currentBlobUrl;
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => {
+              if (link.parentNode) link.parentNode.removeChild(link);
+            }, 1500);
+          } catch (e) {
+            console.warn('Auto download link failed:', e);
+          }
+
+          // Open Download Modal for Mobile & Long-press / Share Sheet
+          openDownloadModal();
+
+          setAllExportButtonsLoading(false);
+          showToast('สร้างรูปภาพรายงานคมชัดสูงสำเร็จ!');
+        };
+
+        if (canvas.toBlob) {
+          canvas.toBlob(processBlob, 'image/png');
+        } else {
+          const dataUrl = canvas.toDataURL('image/png');
+          const blob = dataURLtoBlob(dataUrl);
+          processBlob(blob);
+        }
+
       }).catch(err => {
         container.style.transform = prevTransform;
         container.style.height = prevHeight;
+        if (wrapper) wrapper.style.height = prevWrapperHeight;
         console.error(err);
         alert('เกิดข้อผิดพลาดในการสร้างภาพ: ' + err.message);
-        btn.innerHTML = origText;
-        btn.disabled = false;
+        setAllExportButtonsLoading(false);
       });
+    }
+
+    function dataURLtoBlob(dataurl) {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    }
+
+    function openDownloadModal() {
+      const modal = document.getElementById('downloadModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeDownloadModal() {
+      const modal = document.getElementById('downloadModal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    function shareGeneratedImage() {
+      if (!currentBlob) {
+        showToast('กรุณากดบันทึกรูปภาพก่อนแชร์');
+        return;
+      }
+      try {
+        const file = new File([currentBlob], currentFilename, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: currentFilename,
+            text: 'รายงานผลการปฏิบัติงาน สภ.บางปะกง'
+          }).catch(err => {
+            if (err.name !== 'AbortError') {
+              downloadBlobAgain();
+            }
+          });
+          return;
+        }
+      } catch (err) {
+        console.warn('File share not supported:', err);
+      }
+      downloadBlobAgain();
+      showToast('สามารถแตะค้างที่รูปภาพเพื่อบันทึกรูปภาพลงในคลังภาพ หรือแชร์เข้า LINE ได้เลยครับ');
+    }
+
+    function downloadBlobAgain() {
+      if (!currentBlobUrl) return;
+      const link = document.createElement('a');
+      link.download = currentFilename;
+      link.href = currentBlobUrl;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+      }, 1500);
+      showToast('กำลังดาวน์โหลดรูปภาพ...');
     }
 
     // Copy formatted text for LINE group
@@ -2964,7 +3219,7 @@ ${action}
         🔍 ภาพตัวอย่างขนาดเต็ม (เลื่อนดูและซูมได้)
       </span>
       <div style="display:flex; gap:8px;">
-        <button class="btn btn-sm btn-success" onclick="exportToImage()" style="padding:5px 14px; font-weight:bold; font-size:0.8rem;">
+        <button class="btn btn-sm btn-success btn-export-trigger" onclick="exportToImage()" style="padding:5px 14px; font-weight:bold; font-size:0.8rem;">
           📸 บันทึกรูป (PNG)
         </button>
         <button class="btn btn-sm btn-danger" onclick="closePreviewModal()" style="padding:5px 14px; font-weight:bold; font-size:0.8rem; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer;">
@@ -2974,6 +3229,54 @@ ${action}
     </div>
     <div class="preview-modal-content" onclick="event.stopPropagation()">
       <div id="modalPosterContainer"></div>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD RESULT & MOBILE SAVE MODAL -->
+  <div id="downloadModal" class="preview-modal" style="display:none;" onclick="closeDownloadModal()">
+    <div class="download-modal-wrapper" onclick="closeDownloadModal()">
+      <div class="download-modal-box" onclick="event.stopPropagation()">
+        <div class="download-modal-header">
+          <span style="font-weight:700; color:#0f172a; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+            <span>🎉</span> สร้างรูปภาพรายงานสำเร็จ!
+          </span>
+          <button type="button" onclick="closeDownloadModal()" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:50%; font-size:1.1rem; cursor:pointer; color:#64748b; font-weight:bold;">
+            ✕
+          </button>
+        </div>
+        
+        <!-- Mobile Instructions Card -->
+        <div class="mobile-save-guide">
+          <div style="font-weight:700; color:#15803d; font-size:0.86rem; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+            <span>📱</span> คำแนะนำการบันทึกภาพสำหรับมือถือ:
+          </div>
+          <div style="font-size:0.82rem; color:#0f172a; line-height:1.5;">
+            • หากเครื่องไม่ดาวน์โหลดอัตโนมัติ ให้<strong>แตะค้างที่รูปภาพด้านล่าง</strong> แล้วเลือก <strong>"บันทึกรูปภาพ" (Save Image)</strong> หรือส่งเข้า LINE ได้ทันที<br>
+            • หรือแตะปุ่ม <strong>"📲 แชร์เข้า LINE / บันทึกรูป"</strong> ด้านล่างนี้
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+          <button type="button" class="btn btn-primary" id="btnShareNative" onclick="shareGeneratedImage()" style="flex:1; min-width:140px; justify-content:center; padding:10px 14px; font-weight:700; font-size:0.88rem; background:#0284c7;">
+            📲 แชร์เข้า LINE / บันทึกรูป
+          </button>
+          <button type="button" class="btn btn-success" id="btnDownloadAgain" onclick="downloadBlobAgain()" style="flex:1; min-width:140px; justify-content:center; padding:10px 14px; font-weight:700; font-size:0.88rem; background:#16a34a;">
+            📥 ดาวน์โหลดไฟล์ซ้ำ
+          </button>
+        </div>
+
+        <!-- Image Preview -->
+        <div class="download-img-container">
+          <img id="downloadResultImg" src="" alt="รายงานผลการปฏิบัติงาน" style="width:100%; height:auto; display:block; border-radius:6px; box-shadow:0 4px 15px rgba(0,0,0,0.15);">
+        </div>
+
+        <div style="text-align:center; margin-top:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeDownloadModal()" style="padding:8px 28px; font-size:0.85rem; border-radius:6px;">
+            ✕ ปิดหน้าต่างนี้
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </body>
